@@ -45,7 +45,6 @@ class WallFollower:
 
         self.waypoints = None
         self.lost = False
-        self.waiting = False
         rospy.Timer(rospy.Duration(self.DT), self.pp)
         rospy.on_shutdown(self.hook)
 
@@ -79,19 +78,14 @@ class WallFollower:
                 self.lost = True
                 return
 
-        if self.lost == True: # Wait a little, straighten out
-            self.waiting = True
-            self.lost = False
+        self.lost = False
+        
         back_x = min(cartesian[:,0])
         x = np.linspace(back_x, float(self.LINE_DETECTOR_DIST_X), num=20)
         y = m * x + b - self.SIDE * self.DESIRED_DISTANCE
         self.waypoints = np.array([[x[0], y[0] + 1.25 * m], [x[-1], y[-1] + 1.25 * m]]) # Simple line
+        
         VisualizationTools.plot_line(x, y, self.line_pub, frame="/laser")
-        if self.waiting:
-            if abs(b - self.SIDE * self.DESIRED_DISTANCE) >= self.LD / 1.1:
-                return
-            else:
-                self.waiting = False
 
     def pp(self, event):
         """
@@ -104,12 +98,8 @@ class WallFollower:
         elif self.lost:
             eta = self.SIDE * .15
             lin_vel = self.VELOCITY
-        # elif self.waiting:
-        #     eta = self.SIDE * .003
-        #     lin_vel = self.VELOCITY
         else:
             eta, lin_vel = purepursuit(self.LD, self.L, self.VELOCITY, 0, 0, 0, self.waypoints)
-            rospy.loginfo([eta,lin_vel])
 
         ## Publish msg
         msg = AckermannDriveStamped()

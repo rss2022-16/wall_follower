@@ -4,6 +4,8 @@
 @author: jared
 
 Generic pure pursuit control law for bicycle dynamics model
+
+## Note - does radius of curvature calculation still work for q =/ 0?
 """
 import numpy as np
 
@@ -13,8 +15,7 @@ def purepursuit(ld, L, vel_des, x, y, q, waypoints):
     returns an instantaneous x linear velocity and steering angle eta to follow trajectory
     """
     goal = look_ahead(ld, x, y, waypoints) # Instantaneous goal - lookahead point
-    # R = calc_radius(x, y, q, goal)
-    R = (ld*ld)/(2*goal[1])
+    R = (ld*ld)/(2*goal[1]) # Radius of curvature connecting these points
 
     # Control law !!
     eta = np.arctan(L / R)
@@ -55,22 +56,3 @@ def look_ahead(ld, x, y, waypoints):
     
     # If nothing found
     return waypoints[0,:]
-    
-def calc_radius(x, y, q, goal):
-    """
-    Given pose and a goal position (np.array [x,y]), calculates the radius of curvature
-    connecting the rover and this point.
-    """
-    a = -np.tan(q)
-    b = 1
-    c = np.tan(q) * x - y
-    
-    # Point - line distance
-    y_off = abs(a * goal[0] + b * goal[1] + c) / np.sqrt(a**2 + b**2)
-    
-    # Make sure we have the correct convention, right = -1, left = 1
-    goal_vec = goal - np.array([x, y])
-    heading_vec = np.array([np.cos(q), np.sin(q)])
-    sign = np.sign(np.cross(heading_vec, goal_vec))
-    
-    return y_off * sign
