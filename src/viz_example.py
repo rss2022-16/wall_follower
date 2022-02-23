@@ -24,7 +24,7 @@ class LinePublisher:
         x = np.linspace(-2., 2., num=20)
         y = np.square(x)
 
-        VisualizationTools.plot_line(x, y, self.line_pub, frame="/laser")
+        VisualizationTools.plot_line(x, y, self.line_pub, frame="/base_link")
 
 
 if __name__ == "__main__":
