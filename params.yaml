@@ -1,5 +1,5 @@
 scan_topic: "/scan"
 drive_topic: "vesc/low_level/ackermann_cmd_mux/input/navigation"
 side: 1
-velocity: 1
+velocity: 0.2
 desired_distance: 1.
